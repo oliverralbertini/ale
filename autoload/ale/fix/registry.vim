@@ -32,6 +32,11 @@ let s:default_registry = {
 \       'suggested_filetypes': ['bib'],
 \       'description': 'Format bib files using bibclean.',
 \   },
+\   'pyfmt': {
+\       'function': 'ale#fixers#pyfmt#Fix',
+\       'suggested_filetypes': ['python'],
+\       'description': 'Fix Python files with pyfmt.',
+\   },
 \   'black': {
 \       'function': 'ale#fixers#black#Fix',
 \       'suggested_filetypes': ['python'],
