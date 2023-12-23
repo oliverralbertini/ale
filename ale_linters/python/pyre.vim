@@ -22,13 +22,45 @@ endfunction
 
 function! ale_linters#python#pyre#GetCommand(buffer) abort
     let l:executable = ale_linters#python#pyre#GetExecutable(a:buffer)
-    let l:exec_args = (l:executable =~? 'pipenv\|poetry$' ? ' run pyre' : '') . ' persistent'
+    " pyre --no-saved-state code-navigation --completion=disabled
+    "  --definition=enabled --hover=enabled --references=enabled
+    "  --type-errors=enabled --unsaved-changes=enabled
+    "  --skip-initial-type-check --use-lazy-module-tracking
+    let l:exec_args = [
+    \ ale#Escape(l:executable),
+    \ l:executable =~? 'pipenv\|poetry$' ? 'run pyre' : '',
+    \ '--strict',
+    \ '--noninteractive',
+    \ '--no-saved-state',
+    \ 'code-navigation',
+    \ '--completion=disabled',
+    \ '--definition=enabled',
+    \ '--hover=enabled',
+    \ '--references=enabled',
+    \ '--type-errors=enabled',
+    \ '--unsaved-changes=enabled',
+    \ ]
+    let l:lazy_args = [
+    \ '--skip-initial-type-check',
+    \ '--use-lazy-module-tracking',
+    \ ]
 
-    return ale#Escape(l:executable) . l:exec_args
+    try
+        let l:local_config = ale#path#FindNearestFile(a:buffer, '.pyre_configuration.codenav')
+        let l:code_nav = json_decode(join(readfile(l:local_config)))
+
+        if has_key(l:code_nav, 'allow_shadow_language_server')
+        \ && l:code_nav.allow_shadow_language_server == v:true
+            let l:exec_args = l:exec_args + l:lazy_args
+        endif
+    catch
+    endtry
+
+    return join(l:exec_args, ' ')
 endfunction
 
 function! ale_linters#python#pyre#GetCwd(buffer) abort
-    let l:local_config = ale#path#FindNearestFile(a:buffer, '.pyre_configuration.local')
+    let l:local_config = ale#path#FindNearestFile(a:buffer, '.pyre_configuration.codenav')
 
     return fnamemodify(l:local_config, ':h')
 endfunction

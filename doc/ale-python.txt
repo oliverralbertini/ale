@@ -48,7 +48,7 @@ ALE will look for configuration files with the following filenames. >
   setup.cfg
   pytest.ini
   tox.ini
-  .pyre_configuration.local
+  .pyre_configuration.codenav
   mypy.ini
   .mypy.ini
   pycodestyle.cfg
